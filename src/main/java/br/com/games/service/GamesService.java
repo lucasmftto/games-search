@@ -19,19 +19,39 @@ public class GamesService {
         List<Document> pipeline = new ArrayList<>();
 
         // Estágio do $search
-        Document searchStage = new Document("$search",
-                new Document("text",
-                        new Document("query", termo)
-                                .append("path", "title")
-                                .append("fuzzy", new Document("maxEdits", 2))
-                )
+//        Document searchStage = new Document("$search",
+//                new Document("text",
+//                        new Document("query", termo)
+//                                .append("path", "title")
+//                                .append("score", new Document("boost", 1))
+//                ).append("index", "index_games")
+//        );
+
+
+//        Document searchStage = new Document("$search", new Document("compound", new Document()
+//                .append("must", List.of(
+//                        new Document("text", new Document()
+//                                .append("query", termo)
+//                                .append("path", "title") // Campo obrigatório: "title"
+//                                .append("fuzzy", new Document("maxEdits", 0))
+//                        )
+//                ))
+//        ).append("index", "index_games"));
+
+        Document searchStage = new Document("$search", new Document()
+                .append("phrase", new Document()
+                        .append("query", termo) // O termo exato a ser buscado
+                        .append("path", "title") // Campo onde buscar
+                ).append("index", "index_games")
         );
+
         pipeline.add(searchStage);
 
-        AggregateIterable<Document> result = mongoTemplate.getCollection("gamesss").aggregate(pipeline);
+        AggregateIterable<Document> result = mongoTemplate.getCollection("games").aggregate(pipeline);
 
         for (Document doc : result) {
-            System.out.println(doc);
+            String title = doc.getString("title");
+            System.out.println(title);
         }
         return null;
     }
